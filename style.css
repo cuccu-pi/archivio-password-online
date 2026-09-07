@@ -247,6 +247,17 @@ button:hover,
   word-break: break-word;
 }
 
+.card-number {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.entries-count {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
 .card-date {
   font-size: 0.8rem;
   color: var(--muted);

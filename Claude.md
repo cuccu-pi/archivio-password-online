@@ -742,5 +742,23 @@ L'utente aveva un vecchio archivio di password in un file Microsoft Access, su u
 ### Idea per il futuro
 - Se servisse ripetere l'operazione (es. anche per "Tabella password 01" o per un altro file Access), lo script `export_access.ps1` è riutilizzabile cambiando solo il nome della tabella e il percorso del file `.accdb` di origine.
 
+## Contatore credenziali e numerazione schede (08/09/2026 - Iterazione 10)
+
+### Richiesta
+Con 218 voci importate da Access, l'utente ha chiesto: un'indicazione in alto che mostri quante credenziali sono salvate in totale, e la numerazione progressiva (1, 2, 3...) delle schede in elenco.
+
+### Modifiche
+- **index.html**: aggiunto `<span id="entriesCount">` accanto al titolo "Credenziali salvate", per mostrare il totale tra parentesi.
+- **app.js**:
+  - Nuovo selettore `entriesCount`.
+  - `renderEntries()` aggiorna `entriesCount.textContent` con il numero totale di voci salvate (`entries.length`, indipendente dal filtro di ricerca — mostra sempre il totale dell'archivio).
+  - Ogni scheda mostra ora un numero progressivo (`index + 1`) basato sull'ordine visualizzato nell'elenco filtrato/corrente, tramite uno `<span class="card-number">` prima della descrizione nell'intestazione della scheda.
+- **style.css**: aggiunte le classi `.card-number` e `.entries-count` (colore attenuato, coerente con lo stile esistente).
+- Versione di `app.js` in `index.html` alzata a `?v=20260908` per invalidare la cache del service worker.
+
+### Nota di comportamento
+- Il numero tra parentesi in alto è sempre il totale reale dell'archivio, anche mentre si usa la ricerca.
+- La numerazione 1, 2, 3... sulle schede invece segue l'ordine di ciò che è attualmente visibile (cambia con una ricerca attiva, perché rinumera solo i risultati filtrati).
+
 
 

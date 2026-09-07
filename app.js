@@ -163,6 +163,7 @@ const exportBtn = document.querySelector('#exportBtn');
 const syncBtn = document.querySelector('#syncBtn');
 const importInput = document.querySelector('#importInput');
 const formPasteBtn = document.querySelector('#formPasteBtn');
+const entriesCount = document.querySelector('#entriesCount');
 const modal = document.querySelector('#appModal');
 const historyModal = document.querySelector('#historyModal');
 const historyList = document.querySelector('#historyList');
@@ -465,18 +466,19 @@ async function handleRestoreVersion(event) {
 function renderEntries() {
   const filteredEntries = getFilteredEntries();
   entriesBody.innerHTML = '';
+  entriesCount.textContent = `(${entries.length})`;
 
   if (filteredEntries.length === 0) {
     entriesBody.innerHTML = '<div class="empty-state">Nessuna voce trovata.</div>';
     return;
   }
 
-  filteredEntries.forEach((entry) => {
+  filteredEntries.forEach((entry, index) => {
     const card = document.createElement('div');
     card.className = 'credential-card';
     card.innerHTML = `
       <div class="card-header">
-        <h3>${escapeHtml(entry.description)}</h3>
+        <h3><span class="card-number">${index + 1}.</span> ${escapeHtml(entry.description)}</h3>
         <div class="card-date">Modificato: ${formatDate(entry.updated_at)}</div>
       </div>
       <div class="card-body">
