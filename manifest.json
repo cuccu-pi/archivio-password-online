@@ -1,0 +1,25 @@
+{
+  "name": "Archivio Password",
+  "short_name": "Password Vault",
+  "description": "Archivio personale di password crittografato, con sincronizzazione multi-device.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6fb",
+  "theme_color": "#2563eb",
+  "lang": "it",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

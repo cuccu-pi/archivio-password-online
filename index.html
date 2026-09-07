@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#2563eb" />
+    <title>Archivio Password</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="icon-192.png" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Archivio personale</p>
+          <h1>Password Vault</h1>
+        </div>
+        <div class="topbar-right">
+          <div id="syncStatus" class="sync-status">
+            <span class="status-dot offline"></span>
+            <span class="status-text">Offline</span>
+          </div>
+          <button id="changeMasterBtn" class="secondary-btn" type="button">Cambia password master</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="panel form-panel">
+          <h2>Nuova voce</h2>
+
+          <form id="entryForm">
+            <label>
+              Descrizione
+              <input id="description" name="description" type="text" placeholder="Esempio: Gmail" required />
+            </label>
+
+            <label>
+              Sito web
+              <input id="website" name="website" type="url" placeholder="https://example.com" />
+            </label>
+
+            <label>
+              User ID
+              <input id="userId" name="userId" type="text" placeholder="nome@esempio.it" />
+            </label>
+
+            <label>
+              Password
+              <input id="password" name="password" type="text" placeholder="Inserisci la password" required />
+            </label>
+
+            <label>
+              Ultima modifica
+              <input id="updatedAt" name="updatedAt" type="datetime-local" />
+            </label>
+
+            <label>
+              Note
+              <textarea id="notes" name="notes" rows="4" placeholder="Note aggiuntive..."></textarea>
+            </label>
+
+            <div class="actions">
+              <button id="submitBtn" type="submit">Salva voce</button>
+              <button id="resetBtn" class="secondary-btn" type="button">Pulisci</button>
+              <button id="formPasteBtn" class="secondary-btn hidden" type="button">Incolla</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel list-panel">
+          <div class="list-header">
+            <h2>Credenziali salvate</h2>
+            <input id="searchInput" type="search" placeholder="Cerca descrizione o sito" aria-label="Cerca" />
+          </div>
+
+          <div class="list-actions">
+            <button id="syncBtn" class="secondary-btn" type="button">Sincronizza</button>
+            <button id="exportBtn" class="secondary-btn" type="button">Esporta</button>
+            <label class="import-btn secondary-btn">
+              Importa
+              <input id="importInput" type="file" accept="application/json" hidden />
+            </label>
+          </div>
+
+          <div id="entriesBody" class="entries-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <template id="emptyStateTemplate">
+      <tr>
+        <td colspan="6" class="empty-state">Nessuna voce salvata.</td>
+      </tr>
+    </template>
+
+    <div id="historyModal" class="modal hidden" aria-live="polite">
+      <div class="modal-card history-modal-card" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+        <div class="modal-header">
+          <h3 id="historyModalTitle">Cronologia modifiche</h3>
+        </div>
+        <div class="modal-body">
+          <div id="historyList" class="history-list"></div>
+        </div>
+        <div class="modal-actions">
+          <button id="historyCloseBtn" class="secondary-btn" type="button">Chiudi</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="appModal" class="modal hidden" aria-live="polite">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-header">
+          <h3 id="modalTitle">Avviso</h3>
+        </div>
+        <div class="modal-body">
+          <p id="modalMessage"></p>
+          <label id="modalFieldWrap" class="modal-field hidden">
+            <span id="modalFieldLabel"></span>
+            <input id="modalInput" type="text" />
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button id="modalCancelBtn" class="secondary-btn" type="button">Annulla</button>
+          <button id="modalConfirmBtn" type="button">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="app.js?v=20260907"></script>
+  </body>
+</html>
