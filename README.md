@@ -2,6 +2,8 @@
 
 Un piccolo archivio personale per memorizzare password, credenziali e note in modo semplice e sicuro.
 
+🌐 **App online**: https://cuccu-pi.github.io/archivio-password-online/
+
 ## Funzioni principali
 - Descrizione
 - Sito web
@@ -34,12 +36,17 @@ http://localhost:8000
 ## Sicurezza
 I dati sono salvati nel browser tramite `localStorage` dopo essere stati crittografati con una password master. Questo mantiene i dati fuori da backend e servizi cloud esterni.
 
-## Nuova versione: multi-device
-La prossima evoluzione sarà un archivio accessibile da più dispositivi usando un database gratuito come Supabase. In questo modello:
-- l’app rimane statica
+## Multi-device e offline
+L'app è accessibile da più dispositivi usando Supabase come database gratuito:
+- l'app rimane statica
 - i dati vengono crittografati nel browser
 - il cloud viene usato solo come contenitore sicuro per i record criptati
 - la password master resta il punto di accesso principale
+
+È anche installabile come PWA (icona lucchetto nella barra degli indirizzi o menu "Installa app") e funziona offline grazie a un service worker: i dati locali restano disponibili anche senza connessione, la sincronizzazione riprende automaticamente quando torna la rete.
+
+## Cronologia modifiche
+Ogni volta che una voce viene modificata, la versione precedente viene conservata (fino a 20 versioni per voce) e può essere consultata o ripristinata dal pulsante "Cronologia" sulla scheda. Se si prova a salvare una password già usata per un'altra voce, l'app avvisa prima di procedere.
 
 ## Hosting gratuito
 Il sito può essere pubblicato gratuitamente su:

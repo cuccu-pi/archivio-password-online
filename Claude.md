@@ -648,10 +648,13 @@ Effetto pratico: da un browser compatibile (Chrome/Edge/Android) l'app può esse
 - Nuovo modal dedicato `#historyModal` in `index.html`, stili `.history-*` in `style.css`.
 - Compatibilità: i backup/voci vecchie senza campo `history` continuano a funzionare (trattate come nessuna cronologia).
 
-### 3. Preparazione hosting gratuito (GitHub Pages)
-- Deciso con l'utente: pubblicazione su **GitHub Pages** (gratuito, integrato con Git), usando l'account GitHub esistente dell'utente.
-- Prossimo passo pratico: inizializzare un repository Git nella cartella del progetto, creare un repository su GitHub (nome consigliato: `archivio-password-online`), collegarlo come remote e fare push; poi attivare GitHub Pages dalle impostazioni del repository (branch `main`, root `/`).
-- Nota di sicurezza: `config.js` contiene l'URL Supabase e la **anon key** pubblica (non un segreto per definizione, ma comunque legata al progetto). Va bene pubblicarla su un repo pubblico perché l'accesso è protetto solo dalla password master lato client (i dati sono cifrati prima di arrivare a Supabase); se in futuro si vuole un repo privato, GitHub Pages funziona anche con repository privati sui piani gratuiti personali.
+### 3. Hosting gratuito (GitHub Pages) — ATTIVO ✅
+- Repository: `https://github.com/cuccu-pi/archivio-password-online`
+- Sito pubblicato: **https://cuccu-pi.github.io/archivio-password-online/**
+- Configurazione: Pages da branch `main`, cartella `/ (root)`.
+- Verificato che tutti gli asset (index.html, style.css, app.js, manifest.json, sw.js, icone, config.js) rispondono con HTTP 200 in produzione.
+- Nota di sicurezza: `config.js` contiene l'URL Supabase e la **anon key** pubblica (non un segreto per definizione, ma comunque legata al progetto). Va bene pubblicarla su un repo pubblico perché l'accesso è protetto solo dalla password master lato client (i dati sono cifrati prima di arrivare a Supabase).
+- Per aggiornamenti futuri: modificare i file localmente, `git add`/`git commit`/`git push` sul branch `main` → GitHub Pages ripubblica automaticamente in 1-2 minuti. Ricordarsi di alzare il numero di versione in `index.html` (`app.js?v=...`) quando si cambia `app.js`, altrimenti il service worker potrebbe servire la cache vecchia.
 
 ### File aggiornati/aggiunti in questa iterazione
 ```
@@ -672,8 +675,7 @@ style.css        - stili cronologia e pulsante "Cronologia"
 - Verificare in DevTools → Application → Manifest/Service Workers che l'app risulti installabile
 
 ### Prossimi step
-- Creare repo GitHub e pubblicare con GitHub Pages
-- Verificare il funzionamento PWA da smartphone (installazione su home screen)
+- Verificare il funzionamento PWA da smartphone (installazione su home screen) sull'URL pubblico
 - Valutare, se utile in futuro, un log delle voci eliminate (non solo modificate)
 
 
