@@ -678,5 +678,34 @@ style.css        - stili cronologia e pulsante "Cronologia"
 - Verificare il funzionamento PWA da smartphone (installazione su home screen) sull'URL pubblico
 - Valutare, se utile in futuro, un log delle voci eliminate (non solo modificate)
 
+## ⚠️ Bug critico corretto - sincronizzazione poteva svuotare il cloud (07/09/2026 - Iterazione 8)
+
+### Problema riscontrato
+Dopo aver pubblicato l'app su GitHub Pages, l'utente ha aperto il nuovo URL pubblico e non ha visto nessuna credenziale salvata. Verifica diretta su Supabase (solo metadati, senza decifrare i contenuti): il record cloud conteneva un vault vuoto (`[]`), aggiornato proprio nel momento in cui l'app pubblica era stata aperta per la prima volta.
+
+### Causa
+In `syncWithSupabase()`, la sincronizzazione confrontava l'orario "adesso" (`new Date()` calcolato al momento del confronto) con l'orario dell'ultima modifica remota, invece di usare l'orario reale dell'ultima modifica *locale*. Aprendo l'app da un'origine nuova (`https://cuccu-pi.github.io/...`, diversa da `http://localhost:8000` usato finora — il `localStorage` del browser è isolato per origine) il vault locale risultava vuoto. Il confronto "adesso > orario remoto" risultava quasi sempre vero, quindi l'app decideva di "salvare il locale nel cloud" — cioè sovrascriveva silenziosamente il cloud con un array vuoto, senza alcuna conferma.
+
+Verifica del file di backup scaricato dall'utente (`password-vault-backup-2026-09-07.json`): anche quello conteneva un vault vuoto, quindi non è stato possibile determinare con certezza se esistessero credenziali reali già perse in precedenza, oppure se il vault non avesse ancora dati reali inseriti in modo permanente.
+
+### Correzione implementata in `app.js`
+1. **Nuova chiave `LOCAL_UPDATED_KEY`** (`password-vault-updated-at`) in `localStorage`: registra il momento reale dell'ultima modifica del vault locale, aggiornata da `saveVault()` ad ogni salvataggio.
+2. **Regola di sicurezza aggiunta in `syncWithSupabase()`**: se il vault locale è vuoto e quello remoto non lo è, l'app **adotta sempre i dati dal cloud**, senza eccezioni — non usa più il confronto per timestamp in questo caso, perché un locale vuoto non deve mai poter vincere su un cloud pieno.
+3. Il confronto per timestamp (con richiesta di conferma se il cloud sembra più recente) resta attivo solo quando **entrambi** i vault (locale e remoto) contengono già dati, usando ora l'orario reale dell'ultima modifica locale invece di "adesso".
+4. Versione di `app.js` in `index.html` alzata a `?v=20260907b` per forzare l'aggiornamento della cache del service worker su tutti i dispositivi che avevano già visitato l'app.
+
+### Impatto pratico
+- Aprire l'app per la prima volta su un nuovo dispositivo/browser ora scarica correttamente i dati dal cloud invece di rischiare di azzerarli.
+- Se in futuro compare un vault locale vuoto rispetto a un cloud pieno, l'app non chiede nemmeno conferma: adotta il cloud in automatico, perché non c'è alcuno scenario in cui sovrascriverlo con il vuoto sia la scelta giusta.
+
+### Stato dei dati al momento della scoperta
+- Cloud Supabase: vault vuoto (confermato via API, solo dimensioni/metadati, nessuna password letta in chiaro)
+- Backup scaricato dall'utente: vault vuoto
+- Da verificare con l'utente: se `localStorage` su `http://localhost:8000` (browser/PC originale) contiene ancora credenziali reali mai sincronizzate col cloud — in tal caso, con la correzione applicata, aprire l'app lì le ripristinerà automaticamente anche sul cloud.
+
+### Lezione per il futuro
+- Mai confrontare "adesso" con un timestamp salvato altrove per decidere una sovrascrittura distruttiva: usare sempre l'orario reale dell'ultimo evento locale.
+- Un'operazione che può cancellare dati (push che sovrascrive un cloud pieno) dovrebbe sempre avere una condizione di sicurezza esplicita ("non farlo se il locale è vuoto"), non solo un confronto numerico tra date.
+
 
 

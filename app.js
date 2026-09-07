@@ -1,5 +1,6 @@
 const STORAGE_KEY = 'password-vault-encrypted';
 const MASTER_KEY = 'password-vault-master';
+const LOCAL_UPDATED_KEY = 'password-vault-updated-at';
 const MAX_HISTORY = 20;
 
 let entries = [];
@@ -68,32 +69,47 @@ async function syncWithSupabase() {
     }
 
     const latestRemote = Array.isArray(data) && data.length > 0 ? data[0] : null;
-    const localTimestamp = new Date().toISOString();
 
-    // Gestione conflitti: confronta timestamp
     if (latestRemote && latestRemote.vault_json) {
       const remoteEncrypted = JSON.parse(latestRemote.vault_json);
       const remotePayload = await decryptValue(remoteEncrypted, masterPassword);
       const remoteEntries = JSON.parse(remotePayload);
 
-      const localTime = Number(new Date(localTimestamp));
-      const remoteTime = Number(new Date(latestRemote.updated_at || 0));
+      const localIsEmpty = entries.length === 0;
+      const remoteIsEmpty = remoteEntries.length === 0;
 
-      // Se il remoto è più recente di più di 1 secondo, chiedi conferma
-      if (remoteTime > localTime + 1000) {
-        const result = await showConfirm('Sincronizzazione', 'Il cloud ha dati più recenti. Vuoi sincronizzare i dati dal cloud?');
-        if (result && result.action === 'confirm') {
-          entries = remoteEntries;
-          await saveVault();
-          renderEntries();
-          updateSyncStatus('synced');
-          await showAlert('Sincronizzazione', 'Dati sincronizzati dal cloud.');
-          return;
+      // Un vault locale vuoto non deve MAI sovrascrivere un cloud con dati:
+      // capita al primo accesso da un dispositivo/origine nuova (localStorage vuoto).
+      if (localIsEmpty && !remoteIsEmpty) {
+        entries = remoteEntries;
+        await saveVault();
+        renderEntries();
+        updateSyncStatus('synced');
+        await showAlert('Sincronizzazione', 'Vault locale vuoto: caricati i dati esistenti dal cloud.');
+        return;
+      }
+
+      // Gestione conflitti: confronta l'orario dell'ultima modifica locale reale
+      // (non "adesso") con l'orario dell'ultima modifica remota.
+      if (!localIsEmpty && !remoteIsEmpty) {
+        const localTime = Number(new Date(localStorage.getItem(LOCAL_UPDATED_KEY) || 0));
+        const remoteTime = Number(new Date(latestRemote.updated_at || 0));
+
+        if (remoteTime > localTime + 1000) {
+          const result = await showConfirm('Sincronizzazione', 'Il cloud ha dati più recenti. Vuoi sincronizzare i dati dal cloud?');
+          if (result && result.action === 'confirm') {
+            entries = remoteEntries;
+            await saveVault();
+            renderEntries();
+            updateSyncStatus('synced');
+            await showAlert('Sincronizzazione', 'Dati sincronizzati dal cloud.');
+            return;
+          }
         }
       }
     }
 
-    // Salva i dati locali nel cloud
+    // Salva i dati locali nel cloud (locale più recente, oppure cloud vuoto/assente)
     await pushVaultToSupabase();
     await saveVault();
     renderEntries();
@@ -308,6 +324,7 @@ async function saveVault() {
 
   const payload = await encryptValue(JSON.stringify(entries), masterPassword);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  localStorage.setItem(LOCAL_UPDATED_KEY, new Date().toISOString());
 }
 
 async function loadVault() {
