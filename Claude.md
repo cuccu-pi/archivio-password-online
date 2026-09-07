@@ -711,6 +711,36 @@ Verifica del file di backup scaricato dall'utente (`password-vault-backup-2026-0
 - Confermato con l'utente: il vault non conteneva ancora password reali (l'app era ancora in fase di test/configurazione), quindi **nessun dato è stato perso**. L'allarme era comunque giustificato: il bug era reale e avrebbe potuto cancellare dati veri in futuro.
 - Dopo aver ricaricato `http://localhost:8000` con il codice corretto, la sincronizzazione funziona senza errori (mostra correttamente un elenco vuoto, in modo coerente su locale e cloud).
 - Incidente chiuso. Prossimo passo: aggiungere una prima voce reale e verificare l'intero flusso (salvataggio → sync cloud → apertura da GitHub Pages → cronologia → avviso duplicati).
+- Test end-to-end eseguito dall'utente con una voce di prova: salvataggio, sync e visualizzazione funzionano correttamente.
+
+## Importazione da vecchio database Access (08/09/2026 - Iterazione 9)
+
+### Obiettivo
+L'utente aveva un vecchio archivio di password in un file Microsoft Access, su un NAS di rete, e voleva portarlo nel nuovo Archivio Password Online invece di reinserire tutto a mano.
+
+### File sorgente
+- Percorso: `\\NAS-56-44-00\Backup_01\Old_BackUp_01\Passwords\Password (2).accdb`
+- Il database conteneva più tabelle: `Foglio1` (47 righe), `Foglio2` (70 righe, colonne generiche `Campo1/2/3`, non credenziali), `Tabella password` (218 righe, con colonne `Descrizione`, `indirizzo_web`, `User_ID`, `Password`, `note`, `Data`), `Tabella password 01` (124 righe, stessa struttura ma senza data).
+- Su indicazione dell'utente, importata solo **"Tabella password"** (218 voci); ignorati gli altri fogli.
+
+### Metodo usato (solo strumenti già presenti su Windows, nessun software aggiuntivo)
+- Verificato che il driver ODBC "Microsoft Access Driver (*.mdb, *.accdb)" e il provider OLE DB `Microsoft.ACE.OLEDB.12.0` sono già disponibili sul PC (installati con Office).
+- Lettura del database in sola consultazione tramite PowerShell + COM `ADODB.Connection`/`ADODB.Recordset` (nessuna libreria esterna, nessuna scrittura sul file Access originale).
+- **Nessun dato sensibile è stato mostrato in chat**: prima ispezionata solo la struttura (nomi tabelle e colonne) e il conteggio righe, mai i valori delle password.
+- Script `export_access.ps1` (nella cartella temporanea di sessione, non nel progetto): legge `Tabella password` e genera un file JSON nel "formato vecchio" già supportato da `importEntries()` in `app.js` (semplice array di oggetti `{ id, description, website, userId, password, notes, updated_at }`), con un nuovo GUID generato per ogni voce come `id`.
+- File generato: `import-da-access.json`, copiato in `Downloads` per essere selezionabile dal pulsante **Importa** dell'app.
+- Validazione automatica (conteggio voci, chiavi presenti, nessuna voce senza descrizione/password) senza stampare i contenuti reali.
+
+### Punto di attenzione comunicato all'utente
+- Il pulsante **Importa** dell'app **sostituisce** l'intero archivio corrente, non lo unisce: eventuali voci già presenti (es. quella di test della sessione precedente) vengono perse nell'importazione.
+- Il file `import-da-access.json` contiene le 218 password **in chiaro** (non cifrato): da eliminare da `Downloads` subito dopo l'importazione riuscita, per non lasciare un file sensibile non protetto sul disco.
+
+### Stato
+- File di importazione generato e verificato strutturalmente (218 voci, tutte con descrizione e password compilate).
+- In attesa che l'utente esegua l'importazione dall'app e confermi l'esito.
+
+### Idea per il futuro
+- Se servisse ripetere l'operazione (es. anche per "Tabella password 01" o per un altro file Access), lo script `export_access.ps1` è riutilizzabile cambiando solo il nome della tabella e il percorso del file `.accdb` di origine.
 
 
 
