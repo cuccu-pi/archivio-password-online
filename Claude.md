@@ -707,5 +707,10 @@ Verifica del file di backup scaricato dall'utente (`password-vault-backup-2026-0
 - Mai confrontare "adesso" con un timestamp salvato altrove per decidere una sovrascrittura distruttiva: usare sempre l'orario reale dell'ultimo evento locale.
 - Un'operazione che può cancellare dati (push che sovrascrive un cloud pieno) dovrebbe sempre avere una condizione di sicurezza esplicita ("non farlo se il locale è vuoto"), non solo un confronto numerico tra date.
 
+### Esito verificato con l'utente
+- Confermato con l'utente: il vault non conteneva ancora password reali (l'app era ancora in fase di test/configurazione), quindi **nessun dato è stato perso**. L'allarme era comunque giustificato: il bug era reale e avrebbe potuto cancellare dati veri in futuro.
+- Dopo aver ricaricato `http://localhost:8000` con il codice corretto, la sincronizzazione funziona senza errori (mostra correttamente un elenco vuoto, in modo coerente su locale e cloud).
+- Incidente chiuso. Prossimo passo: aggiungere una prima voce reale e verificare l'intero flusso (salvataggio → sync cloud → apertura da GitHub Pages → cronologia → avviso duplicati).
+
 
 
